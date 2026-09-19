@@ -1,0 +1,297 @@
+\documentclass{article}
+\usepackage{graphicx,subfig}
+\usepackage{graphicx,fancyhdr,amsmath,amssymb,amsthm,subfig,url,hyperref}
+\usepackage[margin=1in]{geometry}
+\usepackage{subfig}
+\usepackage[utf8]{inputenc}
+\usepackage{hyperref}
+\usepackage{amsmath}
+\usepackage{listings}
+\usepackage{xcolor} % for customizing colors (optional)
+\DeclareUnicodeCharacter{2212}{-}
+%\DeclareUnicodeCharacter{2265}{≥}
+% \DeclareUnicodeCharacter{2264}{$\leq$}
+% \DeclareUnicodeCharacter{2265}{$\beq$}
+%----------------------- Macros and Definitions --------------------------
+%%% FILL THIS OUT
+\lstset{
+    language=Matlab, % set language to MATLAB
+    basicstyle=\ttfamily\small, % font type and size
+    numbers=left, % line numbers on the left
+    numberstyle=\tiny, % style of the line numbers
+    stepnumber=1, % display every line number
+    frame=single, % frame around the code block
+    backgroundcolor=\color{gray!10}, % background color
+    keywordstyle=\color{blue}, % color for MATLAB keywords
+    commentstyle=\color{green!50!black}, % color for comments
+    stringstyle=\color{red}, % color for strings
+    breaklines=true, % line breaking
+    breakatwhitespace=true % break lines only at whitespaces
+}
+\newcommand{\SecondAuther}{MohammadParsa Dini - std id: 21385609}
+\newcommand{\exerciseset}{Assignment 1}
+%%% END
+\renewcommand{\theenumi}{\bf \Alph{enumi}}
+%\theoremstyle{plain}
+%\newtheorem{theorem}{Theorem}
+%\newtheorem{lemma}[theorem]{Lemma}
+\fancypagestyle{plain}{}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[RO,LE]{\sffamily\bfseries\large HKUST}
+\fancyhead[LO,RE]{\sffamily\bfseries\large ECE 5460: Stochastic Optimization}
+\fancyfoot[LO,RE]{\sffamily\bfseries\large Homework 1}
+\fancyfoot[RO,LE]{\sffamily\bfseries\thepage}
+\renewcommand{\headrulewidth}{1pt}
+\renewcommand{\footrulewidth}{1pt}
+\newcommand{\circledtimes}{\mathbin{\text{\large$\bigcirc$}\kern-0.9em\times}}
+\graphicspath{{figures/}}
+%-------------------------------- Title ----------------------------------
+\title{
+    \includegraphics[width=3cm]{logo.jpg} \\ % Adjust width as needed
+    Stochastic Optimization \par \exerciseset
+}
+\author{\SecondAuther }
+%--------------------------------- Text ----------------------------------
+\begin{document}
+\maketitle
+\section*{Problem 1}
+\subsection*{1.A}
+let X and Y  come from a bivariate gaussian distribution such that $X = \mu_X + \sigma_X Z_1$ and $Y = \mu_Y +  \sigma_Y ( \rho Z_0  + \sqrt{1-\rho^2} Z_1) $ where $Z_0. Z_1 \sim \mathcal{N}(0,1)$.
+
+\begin{equation*}
+    \vec{X} = \begin{bmatrix} X \\ Y \end{bmatrix} = \begin{bmatrix}
+    \sigma_X & 0 \\
+    \rho \sigma_Y & \sigma_Y \sqrt{1-\rho^2}
+    \end{bmatrix} \begin{bmatrix}
+    Z_1 \\
+    Z_2
+    \end{bmatrix} = A \vec{Z} + \vec{\mu} = T(\vec{Z})
+\end{equation*}
+
+
+Now writing the joint density function for $X,Y$:
+let $u= \frac{X-\mu_X}{\sigma_X}$ and $v= \frac{Y-\mu_y}{\sigma_Y}$ and also let $ x = \mu_X + \rho \frac{\sigma_X}{\sigma_Y}(y - \mu_Y) + \sigma_X \sqrt{1-\rho^2} t $ which suggests $dx = dt  \sqrt{1-\rho^2}$. We can also see that $\det DT = \sigma_X \sigma_Y \sqrt{1-\rho^2}  $.
+
+\begin{align*}
+    f_{X,Y}(x,y) &= f_{\vec{Z}}(T^{-1}(x,y)) \, |\det DT|^{-1} = \frac{1}{2\pi} \exp\left( -\frac{Z_1^2 + Z_2^2}{2} \right) \\
+    &= \frac{1}{2\pi \sigma_X \sigma_Y \sqrt{1-\rho^2}} \exp\left( - \frac{1}{2} \left[(\frac{X-\mu_X}{\sigma_X})^2 + \frac{1}{1-\rho^2}(\frac{Y-\mu_y}{\sigma_Y} - \rho(\frac{X-\mu_X}{\sigma_X}))^2  \right] \right)
+\end{align*}
+
+which implies 
+
+\begin{align*}
+    f_{X,Y}(x,y) &= \frac{1}{2\pi \sigma_X \sigma_Y \sqrt{1-\rho^2}} 
+    \exp\left( - \frac{1}{2 (1-\rho^2)} \left[
+    v^2 + u^2 - 2\rho u v
+    \right] \right)
+\end{align*}
+By plugging $u = \rho v + \sqrt{1-\rho^2}t$ we get:
+
+\begin{align*}
+    f_{X,Y}(x,y) &= \frac{1}{2\pi \sigma_X \sigma_Y \sqrt{1-\rho^2}} 
+    \exp\left( - \frac{1}{2 (1-\rho^2)} \left[
+    v^2 - 2\rho u v (\rho v + \sqrt{1-\rho^2} t) + (\rho v + \sqrt{1-\rho^2} t)^2
+    \right] \right) \\
+    &= \frac{1}{2\pi \sigma_X \sigma_Y \sqrt{1-\rho^2}} 
+    \exp\left( - \frac{1}{2 (1-\rho^2)} \left[
+    v^2 + t^2
+    \right] \right)
+\end{align*}
+
+
+Now we want to show that integration over $f_{X,Y} $ sums to 1:
+
+\begin{align*}
+\iint_{\mathbb{R}^2}
+    f_{X,Y}(x,y) \, dx \, dy &= \iint_{\mathbb{R}^2} \exp\left( - \frac{1}{2 (1-\rho^2)} \left[
+    v^2 + t^2
+    \right] \right) \sqrt{1-\rho^2} \, dt \, dy \\
+    &= \int_{\mathbb{R}} \frac{1}{\sqrt{2\pi}} \exp( -t^2 /2) \, dt \times \int_{\mathbb{R}} \frac{1}{\sqrt{2\pi}\sigma_Y} \exp\left( - \frac{(y-\mu_Y)^2}{2\sigma_Y^2}\right) \, dy = 1 \times 1 = 1
+\end{align*}
+% -----------------------------------------------------------------------------
+\subsection*{1.B}
+Deriving the Conditional distribution: 
+\begin{align*}
+    f_{X|Y} (x|y) &= \frac{f_{X,Y}(x,y)}{f_Y(y)} \\
+    &= \frac{
+    \frac{1}{2\pi \sigma_X \sigma_Y \sqrt{1-\rho^2}} 
+    \exp\left( - \frac{1}{2 (1-\rho^2)} \left[
+    v^2 + u^2 - 2\rho u v
+    \right] \right)
+    }{
+    \frac{1}{\sqrt{2\pi}\sigma_Y} \exp\left( - \frac{v^2}{2} \right)
+    } \\
+    &= \frac{ 
+    \exp\left( - \frac{(u - \rho v)^2}{2 (1-\rho^2)} \right)
+    }{\sqrt{2\pi} \sigma_X \sqrt{1-\rho^2}} = \frac{1}{\sqrt{2\pi \Sigma_{X|Y}^2}} \exp(\frac{-(x - \mu_{X|Y})^2)}{2 \Sigma_{X|Y}^2} )
+\end{align*}
+
+which clearly shows that $X|Y \sim \mathcal{N}(\mu_{X|Y}, \Sigma_{X|Y}^2)$ where $g(Y) = \mu_{X|Y} = \mu_X + \rho \frac{\sigma_X}{\sigma_Y}(Y - \mu_Y) $ and 
+$\Sigma_{X|Y}= \sigma_X \sqrt{1-\rho^2}$.
+
+Now taking expectation over $g(Y)$:
+\begin{align*}
+    \mathbb{E}_Y [X|Y] = \mathbb{E}_Y [ g(Y)]  = \mathbb{E}_Y [ \mu_X + \rho \frac{\sigma_X}{\sigma_Y}(Y - \mu_Y) ] = \mu_X +  \rho \frac{\sigma_X}{\sigma_Y}\mathbb{E}_Y [(Y - \mu_Y)] = \mu_X + 0 = \mu_X
+\end{align*}
+
+We write the MMSE error and also let $h(Y)$ be any estimator of$X$ given $Y$:
+
+\begin{align*}
+    \mathcal{L} &= \mathbb{E}_{X,Y} [ | X - h(Y)|^2 ] \\
+    &= \mathbb{E}_{X,Y} [ | X - h(Y) - g(Y) + g(Y)|^2 ] \\
+    &= \mathbb{E}_{X,Y} [ | X - g(Y)|^2 + |h(Y) - g(Y)|^2 ] - 2 \, \mathbb{E}_{Y} \left[ \mathbb{E}_{X|Y} [ (X - h(Y))(h(Y) - g(Y)) ] \right]
+\end{align*}
+
+Now $\mathbb{E}_{X|Y} [(X-h(Y))(h(Y) - g(Y)) ] = (g(Y) - h(Y)) \mathbb{E}_{X|Y} [(X-h(Y)]  =   (g(Y) - g(Y)) \times 0 = 0 $. Using the same trick, we get:
+$ 
+\mathbb{E}_{X,Y} [ | X - g(Y)|^2 = \mathbb{E}_{Y} [ \mathbb{E}_{X|Y} | X - g(Y)|^2 ] ] = \mathbb{E}_{Y} [ [ 0 ] = 0
+$. Hence:
+
+\begin{align*}
+    \mathcal{L} = \mathbb{E}_{X,Y} [ |h(Y) - g(Y)|^2] 
+\end{align*}
+
+which clearly shows that in order to minimize the MMSE error $\mathcal{L}$, we should let $h(Y) = g(Y)$ and hence, under these circumstances, we prove that $g(Y) = \mu_{X|Y} = \mu_X + \rho \frac{\sigma_X}{\sigma_Y}(Y - \mu_Y)$ is the minimiser of MSE estmator!
+
+% --------------------------------------------------------------------------------------------------
+\subsection*{1.C}
+Calculating the determinant of the matrix $\Sigma$:
+\begin{align*}
+\det \Sigma = \det
+\begin{bmatrix}
+    \sigma_X^2 & \rho\sigma_X\sigma_Y \\
+    \rho\sigma_X\sigma_Y & \sigma_Y^2 
+    \end{bmatrix} = \sigma_X^2\sigma_Y^2 (1- \rho^2)
+\end{align*}
+It is easy to check that if $\rho=1$, then $\det \Sigma=0$ and it would be the deficient case, without the loss of generality let's assume $\rho=1$.
+\\
+We know that $\mathbb{E} [X^2] = \mu_X^2 + \sigma_x^2$ and also $\mathbb{E} [Y^2] = \mu_Y^2 + \sigma_Y^2$. Now, we need to calculate $\mathbb{E} [XY]$:
+
+\begin{align*}
+\mathbb{E}_{X,Y} [XY] = \mathbb{E}_{Y} [ Y \mathbb{E}_{X} [X] ] = \mathbb{E}_{Y} [ Y (\mu_X + \rho \frac{\sigma_X}{\sigma_Y} (Y - \mu_Y) )] = \mu_X\mu_Y + \rho \sigma_X\sigma_Y
+\end{align*}
+We could have also said:
+\begin{align*}
+\mathbb{E}_{X,Y} [XY] = \text{Cov}(X,Y) + \mathbb{E}[X] \mathbb{E}[Y] = \mu_X\mu_Y + \rho \sigma_X\sigma_Y
+\end{align*}
+
+
+Now let $Z = Y - \rho\frac{\sigma_X}{\sigma_Y}X  $, we wish to compute $\text{Var}(Z)$:
+We calculate $\mathbb{E} [Z^2]$ and $\mathbb{E} [Z]$ first:
+\begin{align*}
+\mathbb{E} [Z] = \mathbb{E} [  Y - \rho\frac{\sigma_X}{\sigma_Y}X] = \mu_Y - \rho \frac{\sigma_X}{\sigma_Y}\mu_X \xrightarrow{} (\mathbb{E} [Z])^2 = \mu_Y^2 + \rho^2 \frac{\sigma_X^2}{\sigma_Y^2}\mu_X^2 -2\rho\frac{\sigma_X}{\sigma_Y}\mu_X
+\end{align*}
+and also :
+\begin{align*}
+\mathbb{E} [Z^2] = \mathbb{E} [  (Y - \rho\frac{\sigma_X}{\sigma_Y}X)^2] = 
+\mathbb{E} [Y^2] + \rho^2 \frac{\sigma_X^2}{\sigma_Y^2} \mathbb{E} [X^2] -2\rho\frac{\sigma_X}{\sigma_Y} \mathbb{E} [XY] = 
+\end{align*}
+At last:
+\begin{align*}
+\text{Var}(Z) &= \mathbb{E} [Z^2] - (\mathbb{E} [Z])^2 \\
+&= [\mu_Y^2 + \sigma_Y^2] + \rho^2 \frac{\sigma_X^2}{\sigma_Y^2} [\mu_X^2 + \sigma_X^2] - \rho\frac{\sigma_X}{\sigma_Y} [\mu_X\mu_Y + \rho \sigma_X\sigma_Y] - \left[ \mu_Y^2 + \rho^2 \frac{\sigma_X^2}{\sigma_Y^2}\mu_X^2 - 2\rho\frac{\sigma_X}{\sigma_Y}\mu_X \right] \\
+&= \sigma_Y^2 (1-\rho^2)
+\end{align*}
+And we can easily see that plugging $\rho=1$ results in $\text{Var}(Z)|_{\rho=1} = 0$. Which means $Z = \mathbb{E}[Z]$. Therefore $Y$ is an affine function of $X$ almost surely:
+\begin{align*}
+Z = \mathbb{E}[Z] \implies Y - \frac{\sigma_X}{\sigma_Y}X = \mu_Y - \frac{\sigma_X}{\sigma_Y}\mu_X \implies Y = \mu_Y + \frac{\sigma_X}{\sigma_Y}(X-\mu_X) \quad \text{a.s.}
+\end{align*}
+
+Now let $\mathcal{L} = \{ (x,\frac{\sigma_X}{\sigma_Y}(x-\mu_X)) : x \in \mathbb{R} \} \subseteq \mathbb{R}^2$:
+
+\begin{align*}
+\lambda^2 ( \mathcal{L}) = \int_\mathbb{R} \lambda^1 (\{y: (x,y)\in\mathcal{L}\}) dx = 
+\int_\mathbb{R} \lambda^1 (\{\mu_Y \frac{\sigma_X}{\sigma_Y}(x-\mu_X)\}) dx \xrightarrow[]{\{\mu_Y \frac{\sigma_X}{\sigma_Y}(x-\mu_X)\} \text{ is a singleton}} \int_\mathbb{R} 0 dx = 0\xrightarrow[]{} 
+\end{align*}
+
+ So despite the event $\mathcal{E}: (X,Y) \in \mathcal{L}$ having a probability measure of 1, it has a measure of zero of $\lambda^2(\mathcal{L})=0$.
+\begin{align*}
+\mathbb{P} [\mathcal{E}] = 1 - \mathbb{P} [\mathcal{E}^C] = 1-0 = 0
+\end{align*}
+% ----------------------------------------------------------------------------------------------------
+\section*{Problem 2}
+% ----------------------------------------------------------------------------------------------------
+\section*{Problem 3}
+\subsection*{3.A}
+
+By Markov's inequality, since $S_n \ge 0$, for any $a > 0$:
+\[
+\mathbb{P}(S_n \ge a) \le \frac{\mathbb{E}[S_n]}{a} = \frac{n/\lambda}{a} = \frac{n}{\lambda a}.
+\]
+
+Now plugging $a = \frac{cn}{\lambda}$ ($c > 1$) in above gives: 
+\[
+\mathbb{P} \left(S_n \ge \frac{cn}{\lambda}\right) \le \frac{n}{\lambda \cdot \frac{cn}{\lambda}} = \frac{1}{c}.
+\]
+
+whereas for $a = \frac{n + s\sqrt{n}}{\lambda}$ ($s > 0$), we get:
+\[
+\mathbb{P} \left(S_n \ge \frac{n + s\sqrt{n}}{\lambda}\right) \le \frac{n}{\lambda \cdot \frac{n + s\sqrt{n}}{\lambda}} = \frac{n}{n + s\sqrt{n}} = \frac{1}{1 + \frac{s}{\sqrt{n}}}.
+\]
+
+\paragraph{Asymptotic Behavior:}
+As $n \to \infty$, for $a = cn/\lambda$ the bound is the constant $1/c > 0$, and for $a = (n + s\sqrt{n})/\lambda$ the bound approaches $1$. In both cases, the Markov bound fails to vanish because $\mathbb{E}[S_n]$ and $a$ grow at the same order $O(n)$, so their ratio $n/(\lambda a)$ remains bounded away from $0$.
+
+% ----------------------------------------------------------------------------------------------------
+\subsection*{3.B}
+
+Since $a > n/\lambda = \mathbb{E}[S_n]$, the event $\{S_n \ge a\}$ implies $\{S_n - \mathbb{E}[S_n] \ge a - n/\lambda\}$, which is contained in $\{|S_n - \mathbb{E}[S_n]| \ge a - n/\lambda\}$. Applying Chebyshev's inequality with $t = a - n/\lambda > 0$:
+\[
+\mathbb{P}(S_n \ge a) \le \mathbb{P}\left(|S_n - \mathbb{E}[S_n]| \ge a - \frac{n}{\lambda}\right) \le \frac{\text{Var}(S_n)}{\left(a - \frac{n}{\lambda}\right)^2} = \frac{n/\lambda^2}{\frac{(\lambda a - n)^2}{\lambda^2}} = \frac{n}{(\lambda a - n)^2}.
+\]
+
+Now plugging $a = \frac{cn}{\lambda}$ ($c > 1$), in above gives: 
+\[
+\mathbb{P} \left(S_n \ge \frac{cn}{\lambda}\right) \le \frac{n}{(c n - n)^2} = \frac{n}{n^2(c-1)^2} = \frac{1}{(c-1)^2 n} = O\left(\frac{1}{n}\right).
+\]
+This bound decays polynomially ($1/n$) as $n \to \infty$.
+
+Whereas for $a = \frac{n + s\sqrt{n}}{\lambda}$ ($s > 0$), we get:
+\[
+\mathbb{P}\left(S_n \ge \frac{n + s\sqrt{n}}{\lambda}\right) \le \frac{n}{\left(n + s\sqrt{n} - n\right)^2} = \frac{n}{s^2 n} = \frac{1}{s^2}.
+\]
+This bound is independent of $n$ and does not decay at all as $n \to \infty$.
+
+\paragraph{Applicability of Paley--Zygmund Inequality:}
+No, since the Paley--Zygmund inequality cannot be used to get an upper bound, it is meant to be used for lower bounds as you can see here. Here, the target event $\{S_n \ge a\}$ considers upper-tail deviations where $a > \mathbb{E}[S_n] = n/\lambda$, which corresponds to $\theta > 1$ where Paley--Zygmund does not apply. Furthermore, if we try to use Markov, we can't cause $S_n - \mathbb{E} S_n $ must be positive, so even if we take the square of both sides we will still get an upperbound not a lower bound:
+\[
+\frac{\text{Var}(S_n)}{(\mathbb{E}[S_n^2] (\theta -1 )^2}\ge \mathbb{P}(S_n > \theta \, \mathbb{E}[S_n]) \ge (1 - \theta)^2 \frac{(\mathbb{E}[S_n])^2}{\mathbb{E}[S_n^2]}
+\]
+% ----------------------------------------------------------------------------------------------------
+\subsection*{3.C}
+Applying Chernoff bound we can get:
+\begin{align*}
+\mathbb{P}(S_n \ge a) = \mathbb{P}(e^{\theta S_n} \ge e^{\theta a}) \le B_n(a)=\inf_{1\ge \theta >0} \frac{\mathbb{E}[e^{\theta S_n}]}{e^{\theta a}}
+\end{align*}
+Now we wish to minimise the R.H.S to make the bound even tighter. To minimize $g(\theta) = e^{-\theta a} (\frac{\lambda}{\lambda - \theta})^n$, take logs to get $h(\theta) = -\theta a + n\ln\lambda - n\ln(\lambda - \theta)$. Setting the derivative $h'(\theta) = -a + \frac{n}{\lambda - \theta} = 0$ yields the minimizer $\theta^* = \lambda - \frac{n}{a}$. Since $h''(\theta) = \frac{n}{(\lambda - \theta)^2} > 0$, this is a minimum. For $a > \frac{n}{\lambda}$, we have $0 < \frac{n}{a} < \lambda$, which ensures $\theta^* \in (0, \lambda)$.
+
+Substituting $\lambda - \theta^* = \frac{n}{a}$ back into the bound yields
+\begin{align*}
+B_n(a) = \exp\left( -\left(\lambda - \frac{n}{a}\right)a \right) \left( \frac{\lambda a}{n} \right)^n 
+= \exp\left( -\left[ \lambda a - n - n \ln\left(\frac{\lambda a}{n}\right) \right] \right) 
+= \exp\left( -n I\left(\frac{\lambda a}{n}\right) \right),
+\end{align*}
+where $I(x) = x - 1 - \ln x$. 
+
+Finally, $I(1) = 1 - 1 - \ln 1 = 0$. Since $I'(x) = 1 - \frac{1}{x}$ is negative for $x \in (0,1)$ and positive for $x > 1$, and $I''(x) = \frac{1}{x^2} > 0$, $I(x)$ is strictly convex on $(0, \infty)$ with a unique global minimum at $x = 1$. Hence, $I(x) > 0$ for all $x > 0$ with $x \neq 1$.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\end{document}
